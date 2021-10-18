@@ -1,0 +1,127 @@
+---
+title: "Distribution of deprivation in London"
+author: "Veronica Tuffrey"
+date: "7/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+always_allow_html: yes
+---
+
+### **Data source**    
+Deprivation data were downloaded from [the government statistics website](https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019). 
+
+
+```{r setup, include=FALSE}
+
+# This file is an edited version of a demo doc created by Marta Lapsley
+
+# First load required packages. The ones listed here are the ones needed to run Marta's code.
+
+library(tidyverse)
+library(gglaplot)
+library(scales)
+library(readxl)
+library(knitr)
+library(sf)
+library(sp)
+library(kableExtra)
+library(magick)
+library(forcats)
+
+
+
+# Import the data.
+
+# Read in data for the IMD map and barchart:
+LAsIMD <- read_csv("C:/Deprivation_analysis/IMD_Domains_by_Borough_2019.csv")
+
+# Import borough boundaries
+borough_boundaries<-
+  st_read("2011_census_london_boroughs/London_Borough_Excluding_MHW.shp")
+
+# Disable scientific notation
+options(scipen=999)
+
+
+```
+
+
+**Variation in deprivation by borough in 2019** 
+
+
+
+```{r, echo=FALSE}
+
+LAsIMD <- LAsIMD %>% 
+  left_join(borough_boundaries, by=c("Area Code"="GSS_CODE"))
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=IMD))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "IMD: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=INCOME))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Income domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=EMPLOYMENT))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Employment domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=EDUCATION))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Education domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=HEALTH))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Health domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=CRIME))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Crime domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=BARRIERS))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Barriers domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+ggplot(LAsIMD, aes(geometry=geometry, fill=LIVING))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(legend.position="right") +
+  labs(title= "Living domain: Proportion of LSOAs in most deprived 10% nationally, London, 2019" )
+
+```
+
+
+$~$

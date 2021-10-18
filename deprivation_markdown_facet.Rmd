@@ -1,0 +1,101 @@
+---
+title: "Distribution of deprivation in London"
+author: "Veronica Tuffrey"
+date: "7/10/2021"
+output:
+  html_document: default
+  pdf_document: default
+always_allow_html: yes
+---
+
+### **Data source**    
+Deprivation data were downloaded from [the government statistics website](https://www.gov.uk/government/statistics/english-indices-of-deprivation-2019). 
+
+
+
+```{r setup, include=FALSE}
+
+# This file is an edited version of a demo doc created by Marta Lapsley
+
+# First load required packages. The ones listed here are the ones needed to run Marta's code.
+
+library(tidyverse)
+library(gglaplot)
+library(scales)
+library(readxl)
+library(knitr)
+library(sf)
+library(sp)
+library(kableExtra)
+library(magick)
+library(forcats)
+
+
+# Import the data.
+
+# Read in data for the IMD maps:
+LAsIMD <- read_csv("C:/Deprivation_analysis/IMD_Domains_by_Borough_2019.csv")
+
+# Reshape from wide to long
+LAsIMD_long <- LAsIMD %>%       # Apply pivot_longer function
+  pivot_longer(c("IMD", "INCOME", "EMPLOYMENT", "EDUCATION", "HEALTH", "CRIME", "BARRIERS", "LIVING")) %>% data.frame
+head(LAsIMD_long)  
+
+# Import borough boundaries
+borough_boundaries<-
+  st_read("2011_census_london_boroughs/London_Borough_Excluding_MHW.shp")
+
+# Disable scientific notation
+options(scipen=999)
+
+```
+### 1) Overall deprivation by borough in 2019
+Rachel Lesser provided some commentary in September 2019 [Rachel's initial analysis](https://data.london.gov.uk/blog/indices-of-deprivation-2019-initial-analysis/)
+
+Also London Councils produced a useful report [London Councils Report](https://www.londoncouncils.gov.uk/sites/default/files/Indices%20of%20Multiple%20Deprivation%202019-a.pdf)
+The map below shows Hackney has the highest proportion of areas within the most deprived 10 per cent nationally (11% of its LSOAs). Haringay, and Kensington and Chelsea have the next highest proportions at 10% and 9% respectively. Eleven boroughs have no LSOAs falling within the most deprived 10 per cent nationally.
+
+```{r, echo=FALSE}
+
+IMD_long <- LAsIMD_long %>% 
+  left_join(borough_boundaries, by=c("Area.Code"="GSS_CODE"))
+
+IMD_IMD <- filter(IMD_long, name == "IMD")
+ggplot(IMD_IMD, aes(geometry=geometry, fill=value))+
+      ggla_sf()+
+      theme_gla()+
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(plot.title = element_text(size = 16, hjust = 0.5)) +
+      theme(legend.position="right") +
+  labs(title= "Overall IMD: Proportion of LSOAs in most\ndeprived 10% nationally, London, 2019" )
+```
+
+### 2) Deprivation domains by borough in 2019
+The Barriers to Housing and Services Domain incorporates indicators of distance to various essential services, homelessness, housing affordability and overcrowding. The first map below shows that London has very high levels of deprivation within this domain. In Newnham, all of its LSOAs fall within the most deprived 10 per cent nationally, and in Hackney, and in Barking and Dagenham, the value is 94%. Camden, Richmond and Westminster have no areas falling in the most deprived decile.   
+
+The pattern of overall income deprivation domain is similar to the overall IMD (map above). But the employment deprivation domain is quite different. Rachel attributes this to the low levels of unemployment and work-limiting disability in London.  Westminster, and Kensington and Chelsea have the highest levels, with only 10% and 11% of their LSOAs in the most deprived decile nationally.
+
+The living environment domain measures housing in poor condition, housing without central heating, air quality and road traffic accidents.  44% of LSOAs in Lambeth fall within the most deprived 10 per cent nationally, and in Kensington and Chelsea, and Westminster the values are 41% and 38%.
+
+*NB It's not useful to use faceting here since it's hard to perceive the differences between boroughs for any domain except BARRIERS and LIVING* 
+
+
+```{r, echo=FALSE}
+# Got example code for faceting from https://datavizstory.com/facet-map/
+
+IMD_Domains <- filter(IMD_long, name != "IMD")
+ggplot(IMD_Domains, aes(geometry=geometry, fill=value))+
+      ggla_sf()+
+      theme_gla()+
+      facet_wrap("~ name", ncol=4) +
+      scale_fill_gradient(low="slategray1",
+                          high="royalblue4")+
+      theme(plot.title = element_text(size = 16, hjust = 0.5)) +
+      theme(legend.position="right") +
+  labs(title= "IMD domains: Proportion of LSOAs in most\ndeprived 10% nationally, London, 2019" )
+
+
+
+```
+$~$
